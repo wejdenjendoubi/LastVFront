@@ -1,6 +1,6 @@
 import { environment } from '../../environments/environment';
 
-const BASE = environment.baseUrl;
+const BASE = `${environment.baseUrl}/api`;
 
 export const API = {
   AUTH: {

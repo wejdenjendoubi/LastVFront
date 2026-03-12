@@ -26,9 +26,9 @@ export const authGuard: CanActivateFn = (
   if (hasAccess) return true;
 
   if (auth.hasRole('ROLE_ADMIN')) {
-    if (state.url !== '/dashboard-v1') router.navigate(['/dashboard-v1']);
+    if (state.url !== '/app/dashboard') router.navigate(['/app/dashboard']);
   } else if (user.authorities.length > 0) {
-    if (state.url.includes('user-management')) router.navigate(['/dashboard-v1']);
+    if (state.url.includes('user-management')) router.navigate(['/app/dashboard']);
   } else {
     auth.logout();
   }
