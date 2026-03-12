@@ -31,14 +31,28 @@ export class MenuManagementComponent implements OnInit {
     });
   }
 
-  openAddModal(): void  { this.isEditMode=false; this.isSubMenu=false; this.resetForm(); this.displayModal=true; }
-  openEditModal(item: MenuItemDTO): void { this.isEditMode=true; this.isSubMenu=item.parentId!=null; this.newMenu={...item}; this.displayModal=true; }
-  onSubMenuToggle(): void { if (!this.isSubMenu) this.newMenu.parentId=null; }
+  openAddModal(): void {
+    this.isEditMode = false;
+    this.isSubMenu  = false;
+    this.resetForm();
+    this.displayModal = true;
+  }
+
+  openEditModal(item: MenuItemDTO): void {
+    this.isEditMode   = true;
+    this.isSubMenu    = item.parentId != null;
+    this.newMenu      = { ...item };
+    this.displayModal = true;
+  }
+
+  onSubMenuToggle(): void {
+    if (!this.isSubMenu) this.newMenu.parentId = null;
+  }
 
   deleteMenu(id: number): void {
     if (!confirm('Supprimer cet élément ?')) return;
     this.adminService.deleteMenuItem(id).subscribe({
-      next: () => { this.loadMenus(); alert('Menu supprimé !'); },
+      next:  () => { this.loadMenus(); alert('Menu supprimé !'); },
       error: (err: any) => console.error('Erreur suppression', err)
     });
   }
@@ -50,13 +64,26 @@ export class MenuManagementComponent implements OnInit {
       ? this.adminService.updateMenuItem(payload.menuItemId, payload)
       : this.adminService.createMenuItem(payload);
     req.subscribe({
-      next: () => { this.displayModal=false; this.loadMenus(); this.resetForm(); alert(this.isEditMode ? 'Menu modifié !' : 'Menu ajouté !'); },
-      error: (err: any) => console.error("Erreur envoi", err)
+      next:  () => {
+        this.displayModal = false;
+        this.loadMenus();
+        this.resetForm();
+        alert(this.isEditMode ? 'Menu modifié !' : 'Menu ajouté !');
+      },
+      error: (err: any) => console.error('Erreur envoi', err)
     });
   }
 
-  resetForm(): void { this.newMenu={menuItemId:0,label:'',icon:'',link:'',isTitle:0,isLayout:0,parentId:null}; this.isSubMenu=false; }
+  resetForm(): void {
+    this.newMenu = { menuItemId:0, label:'', icon:'', link:'', isTitle:0, isLayout:0, parentId:null };
+    this.isSubMenu = false;
+  }
 
-  get parentMenuOptions(): MenuItemDTO[] { return this.menus().filter(m => m.menuItemId!==this.newMenu.menuItemId && !m.parentId); }
-  getParentLabel(parentId: number): string { return this.menus().find(m => m.menuItemId===parentId)?.label ?? `#${parentId}`; }
+  get parentMenuOptions(): MenuItemDTO[] {
+    return this.menus().filter(m => m.menuItemId !== this.newMenu.menuItemId && !m.parentId);
+  }
+
+  getParentLabel(parentId: number): string {
+    return this.menus().find(m => m.menuItemId === parentId)?.label ?? `#${parentId}`;
+  }
 }
