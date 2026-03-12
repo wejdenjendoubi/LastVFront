@@ -13,58 +13,75 @@
     </span>
   </div>
 
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="sidebar-loading">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+  }
+
   <!-- Nav -->
-  <nav class="sidebar-nav">
-    @for (item of visibleItems(); track item.label) {
+  @if (!isLoading()) {
+    <nav class="sidebar-nav">
+      @for (item of rootMenus(); track item.menuItemId) {
 
-      <!-- Item avec enfants -->
-      @if (item.children) {
-        <div class="nav-group" [class.active]="isGroupActive(item)">
-          <button class="nav-item" (click)="toggleExpand(item.label)"
-            [class.open]="expanded() === item.label"
-            [class.group-active]="isGroupActive(item)">
-            <span class="nav-icon">
-              <i class="feather {{ item.icon }}"></i>
-            </span>
-            <span class="nav-label">{{ item.label }}</span>
-            <span class="nav-arrow">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </span>
-          </button>
+        <!-- Menu avec enfants -->
+        @if (hasChildren(item)) {
+          <div class="nav-group" [class.active]="isGroupActive(item)">
+            <button class="nav-item"
+              (click)="toggleExpand(item.label)"
+              [class.open]="expanded() === item.label"
+              [class.group-active]="isGroupActive(item)">
+              <span class="nav-icon">
+                <i class="{{ item.icon }}"></i>
+              </span>
+              <span class="nav-label">{{ item.label }}</span>
+              <span class="nav-arrow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+            </button>
 
-          <!-- Tooltip (mode survolé) -->
-          <div class="nav-tooltip">{{ item.label }}</div>
+            <div class="nav-tooltip">{{ item.label }}</div>
 
-          <!-- Sous-menu -->
-          <div class="nav-children" [class.open]="expanded() === item.label">
-            @for (child of item.children; track child.label) {
-              <button class="nav-child"
-                [class.active]="isActive(child.path)"
-                (click)="navigate(child.path!)">
-                <span class="child-dot"></span>
-                <span class="child-label">{{ child.label }}</span>
-              </button>
-            }
+            <div class="nav-children" [class.open]="expanded() === item.label">
+              @for (child of getChildren(item.menuItemId); track child.menuItemId) {
+                <button class="nav-child"
+                  [class.active]="isActive(child.link)"
+                  (click)="navigate(child.link!)">
+                  <span class="child-dot"></span>
+                  <span class="child-label">{{ child.label }}</span>
+                </button>
+              }
+            </div>
           </div>
-        </div>
 
-      <!-- Item simple -->
-      } @else {
-        <div class="nav-group">
-          <button class="nav-item"
-            [class.active]="isActive(item.path)"
-            (click)="navigate(item.path!)">
-            <span class="nav-icon">
-              <i class="feather {{ item.icon }}"></i>
-            </span>
-            <span class="nav-label">{{ item.label }}</span>
-          </button>
-          <div class="nav-tooltip">{{ item.label }}</div>
+        <!-- Menu simple -->
+        } @else {
+          <div class="nav-group">
+            <button class="nav-item"
+              [class.active]="isActive(item.link)"
+              (click)="navigate(item.link!)">
+              <span class="nav-icon">
+                <i class="{{ item.icon }}"></i>
+              </span>
+              <span class="nav-label">{{ item.label }}</span>
+            </button>
+            <div class="nav-tooltip">{{ item.label }}</div>
+          </div>
+        }
+
+      } @empty {
+        <div class="sidebar-empty">
+          <i class="feather icon-menu"></i>
+          <span>Aucun menu disponible</span>
         </div>
       }
-    }
-  </nav>
+    </nav>
+  }
 
 </aside>

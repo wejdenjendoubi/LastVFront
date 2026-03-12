@@ -1,14 +1,24 @@
 <div class="container-fluid py-4">
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Gestion des Menus</h5>
-      <button class="btn btn-primary btn-sm" (click)="openAddModal()">
-        + Ajouter un menu
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <i class="feather icon-menu"></i>
+        </div>
+        <div>
+          <h5 class="mb-0">Gestion des Menus</h5>
+          <span class="header-sub">{{ menus().length }} élément(s) configuré(s)</span>
+        </div>
+      </div>
+      <button class="btn-add" (click)="openAddModal()">
+        <i class="feather icon-plus"></i>
+        Ajouter un menu
       </button>
     </div>
-    <div class="card-body">
 
-      <!-- Table -->
+    <div class="card-body">
       <table class="table table-hover align-middle">
         <thead class="table-light">
           <tr>
@@ -23,22 +33,48 @@
         <tbody>
           @for (item of menus(); track item.menuItemId) {
             <tr>
-              <td>{{ item.menuItemId }}</td>
-              <td>{{ item.label }}</td>
-              <td><i class="{{ item.icon }}"></i> {{ item.icon }}</td>
-              <td>{{ item.link }}</td>
-              <td>{{ item.parentId ? getParentLabel(item.parentId) : '—' }}</td>
+              <td><span class="row-id">{{ item.menuItemId }}</span></td>
+              <td><span class="row-label">{{ item.label }}</span></td>
               <td>
-                <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(item)">Éditer</button>
-                <button class="btn btn-sm btn-outline-danger" (click)="deleteMenu(item.menuItemId)">Supprimer</button>
+                <span class="icon-badge">
+                  <i class="{{ item.icon }}"></i>
+                  {{ item.icon }}
+                </span>
+              </td>
+              <td><span class="link-text">{{ item.link }}</span></td>
+              <td>
+                @if (item.parentId) {
+                  <span class="parent-badge">{{ getParentLabel(item.parentId) }}</span>
+                } @else {
+                  <span class="no-parent">—</span>
+                }
+              </td>
+              <td>
+                <div class="action-group">
+                  <button class="btn-action edit" (click)="openEditModal(item)" title="Éditer">
+                    <i class="feather icon-edit-2"></i>
+                    Éditer
+                  </button>
+                  <button class="btn-action delete" (click)="deleteMenu(item.menuItemId)" title="Supprimer">
+                    <i class="feather icon-trash-2"></i>
+                    Supprimer
+                  </button>
+                </div>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="6" class="text-center text-muted">Aucun menu trouvé.</td></tr>
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <div class="empty-icon"><i class="feather icon-inbox"></i></div>
+                  <p>Aucun menu trouvé</p>
+                  <span>Cliquez sur "Ajouter un menu" pour commencer</span>
+                </div>
+              </td>
+            </tr>
           }
         </tbody>
       </table>
-
     </div>
   </div>
 </div>
@@ -46,44 +82,143 @@
 <!-- Modal -->
 @if (displayModal) {
   <div class="modal-backdrop-custom" (click)="displayModal=false"></div>
+
   <div class="modal-custom">
+
+    <!-- Header -->
     <div class="modal-custom-header">
-      <h6>{{ isEditMode ? 'Modifier le menu' : 'Ajouter un menu' }}</h6>
-      <button class="btn-close" (click)="displayModal=false"></button>
-    </div>
-    <div class="modal-custom-body">
-      <div class="mb-3">
-        <label class="form-label">Label</label>
-        <input class="form-control" [(ngModel)]="newMenu.label" placeholder="Nom du menu" />
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Icône (classe CSS)</label>
-        <input class="form-control" [(ngModel)]="newMenu.icon" placeholder="ex: feather icon-home" />
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Lien</label>
-        <input class="form-control" [(ngModel)]="newMenu.link" placeholder="ex: /dashboard" />
-      </div>
-      <div class="mb-3 form-check">
-        <input class="form-check-input" type="checkbox" id="isSubMenu"
-          [(ngModel)]="isSubMenu" (change)="onSubMenuToggle()" />
-        <label class="form-check-label" for="isSubMenu">Sous-menu</label>
-      </div>
-      @if (isSubMenu) {
-        <div class="mb-3">
-          <label class="form-label">Menu parent</label>
-          <select class="form-select" [(ngModel)]="newMenu.parentId">
-            <option [ngValue]="null">-- Sélectionner --</option>
-            @for (m of parentMenuOptions; track m.menuItemId) {
-              <option [ngValue]="m.menuItemId">{{ m.label }}</option>
-            }
-          </select>
+      <div class="modal-title-wrap">
+        <div class="modal-icon" [class.edit-mode]="isEditMode">
+          <i class="feather" [class.icon-edit-2]="isEditMode" [class.icon-plus]="!isEditMode"></i>
         </div>
-      }
+        <div>
+          <h6>{{ isEditMode ? 'Modifier le menu' : 'Ajouter un menu' }}</h6>
+          <span class="modal-sub">{{ isEditMode ? 'Modifiez les informations du menu' : 'Remplissez les informations du nouveau menu' }}</span>
+        </div>
+      </div>
+      <button class="btn-close-custom" (click)="displayModal=false">
+        <i class="feather icon-x"></i>
+      </button>
     </div>
+
+    <!-- Body -->
+    <div class="modal-custom-body">
+
+      <!-- Preview card -->
+      <div class="preview-card">
+        <div class="preview-label">Aperçu</div>
+        <div class="preview-content">
+          <div class="preview-icon-wrap">
+            <i class="{{ newMenu.icon || 'feather icon-menu' }}"></i>
+          </div>
+          <div class="preview-info">
+            <span class="preview-name">{{ newMenu.label || 'Nom du menu' }}</span>
+            <span class="preview-link">{{ newMenu.link || '/lien' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Champs -->
+      <div class="form-grid">
+
+        <!-- Label -->
+        <div class="form-field">
+          <label class="field-label">
+            <i class="feather icon-tag"></i>
+            Label <span class="required">*</span>
+          </label>
+          <input
+            class="field-input"
+            [(ngModel)]="newMenu.label"
+            placeholder="ex: Dashboard"
+            [class.filled]="newMenu.label"
+          />
+        </div>
+
+        <!-- Lien -->
+        <div class="form-field">
+          <label class="field-label">
+            <i class="feather icon-link"></i>
+            Lien <span class="required">*</span>
+          </label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">/</span>
+            <input
+              class="field-input with-prefix"
+              [(ngModel)]="newMenu.link"
+              placeholder="ex: dashboard"
+              [class.filled]="newMenu.link"
+            />
+          </div>
+        </div>
+
+        <!-- Icône -->
+        <div class="form-field full-width">
+          <label class="field-label">
+            <i class="feather icon-star"></i>
+            Icône (classe CSS)
+          </label>
+          <div class="icon-input-wrap">
+            <input
+              class="field-input"
+              [(ngModel)]="newMenu.icon"
+              placeholder="ex: feather icon-home"
+              [class.filled]="newMenu.icon"
+            />
+            <div class="icon-preview-inline">
+              <i class="{{ newMenu.icon || 'feather icon-menu' }}"></i>
+            </div>
+          </div>
+          <span class="field-hint">Classes Feather : feather icon-home, feather icon-users...</span>
+        </div>
+
+        <!-- Toggle Sous-menu -->
+        <div class="form-field full-width">
+          <div class="toggle-wrap" [class.active]="isSubMenu">
+            <div class="toggle-info">
+              <i class="feather icon-git-branch"></i>
+              <div>
+                <span class="toggle-title">Sous-menu</span>
+                <span class="toggle-desc">Ce menu est un enfant d'un autre menu</span>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="isSubMenu" (change)="onSubMenuToggle()" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Menu parent -->
+        @if (isSubMenu) {
+          <div class="form-field full-width" style="animation: slideDown 0.25s ease">
+            <label class="field-label">
+              <i class="feather icon-corner-down-right"></i>
+              Menu parent <span class="required">*</span>
+            </label>
+            <select class="field-select" [(ngModel)]="newMenu.parentId">
+              <option [ngValue]="null">-- Sélectionner un parent --</option>
+              @for (m of parentMenuOptions; track m.menuItemId) {
+                <option [ngValue]="m.menuItemId">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- Footer -->
     <div class="modal-custom-footer">
-      <button class="btn btn-secondary me-2" (click)="displayModal=false">Annuler</button>
-      <button class="btn btn-primary" (click)="submitMenu()">{{ isEditMode ? 'Modifier' : 'Ajouter' }}</button>
+      <button class="btn-cancel" (click)="displayModal=false">
+        <i class="feather icon-x"></i>
+        Annuler
+      </button>
+      <button class="btn-submit" (click)="submitMenu()">
+        <i class="feather" [class.icon-check]="isEditMode" [class.icon-plus]="!isEditMode"></i>
+        {{ isEditMode ? 'Enregistrer les modifications' : 'Ajouter le menu' }}
+      </button>
     </div>
+
   </div>
 }

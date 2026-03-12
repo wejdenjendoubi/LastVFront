@@ -21,9 +21,19 @@ export const routes: Routes = [
       { path: 'user-management',  canActivate: [authGuard], loadComponent: () => import('./components/user-management/user-management').then(m => m.UserManagementComponent) },
       { path: 'role-permissions', loadComponent: () => import('./components/role-permissions/role-permissions').then(m => m.RolePermissionsComponent) },
       { path: 'menu-management',  loadComponent: () => import('./components/menu-management/menu-management').then(m => m.MenuManagementComponent) },
-      { path: 'audit',            canActivate: [authGuard], loadComponent: () => import('./components/audit/audit-list/audit-list').then(m => m.AuditListComponent) }
+      { path: 'audit',            canActivate: [authGuard], loadComponent: () => import('./components/audit/audit-list/audit-list').then(m => m.AuditListComponent) },
+
+      // ← Ajouter cette ligne : toute route inconnue dans /app → not-found
+      { path: '**', loadComponent: () => import('./components/not-found/not-found').then(m => m.NotFoundComponent) }
     ]
   },
 
-  { path: '**', redirectTo: 'login' }
+  // ← Route globale not-found pour les URLs hors /app
+  {
+    path: 'not-found',
+    loadComponent: () =>
+      import('./components/not-found/not-found').then(m => m.NotFoundComponent)
+  },
+
+  { path: '**', redirectTo: 'not-found' }  // ← redirige vers not-found au lieu de login
 ];
