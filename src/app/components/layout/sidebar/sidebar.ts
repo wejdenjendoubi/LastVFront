@@ -23,12 +23,10 @@ export class SidebarComponent implements OnInit {
   menuItems  = signal<MenuItemDTO[]>([]);
   isLoading  = signal(true);
 
-  // Menus racine (sans parent)
   rootMenus = computed(() =>
     this.menuItems().filter(m => !m.parentId)
   );
 
-  // Enfants d'un menu
   getChildren(parentId: number): MenuItemDTO[] {
     return this.menuItems().filter(m => m.parentId === parentId);
   }
@@ -55,7 +53,6 @@ export class SidebarComponent implements OnInit {
         this.menuItems.set(items);
         this.isLoading.set(false);
 
-        // Auto-expand le groupe actif
         const active = items.find(m =>
           m.parentId && this.activeUrl().includes(m.link || '')
         );
@@ -74,7 +71,7 @@ export class SidebarComponent implements OnInit {
 
   isActive(link?: string): boolean {
     if (!link) return false;
-    return this.activeUrl().includes(link);
+    return this.activeUrl() === link || this.activeUrl().startsWith(link + '/');
   }
 
   isGroupActive(item: MenuItemDTO): boolean {
@@ -83,6 +80,10 @@ export class SidebarComponent implements OnInit {
   }
 
   navigate(link: string): void {
-    this.router.navigate(['/app' + link]);
+    if (!link) return;
+    const link2 = link.trim();
+    // Liens en DB sans /app/ → on préfixe uniquement si pas déjà présent
+    const url = link2.startsWith('/app') ? link2 : '/app' + (link2.startsWith('/') ? link2 : '/' + link2);
+    this.router.navigateByUrl(url);
   }
 }
